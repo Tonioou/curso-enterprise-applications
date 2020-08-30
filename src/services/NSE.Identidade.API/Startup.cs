@@ -13,10 +13,10 @@ namespace NSE.Identidade.API
         public Startup(IHostEnvironment hostEnvironment)
         {
             var builder = new ConfigurationBuilder()
-                    .SetBasePath(hostEnvironment.ContentRootPath)
-                    .AddJsonFile("appsettings.json", true, true)
-                    .AddJsonFile($"appsettings.{hostEnvironment.EnvironmentName}.json", true, true)
-                    .AddEnvironmentVariables();
+                  .SetBasePath(hostEnvironment.ContentRootPath)
+                  .AddJsonFile("appsettings.json", true, true)
+                  .AddJsonFile($"appsettings.{hostEnvironment.EnvironmentName}.json", true, true)
+                  .AddEnvironmentVariables();
 
             if (hostEnvironment.IsDevelopment())
             {
