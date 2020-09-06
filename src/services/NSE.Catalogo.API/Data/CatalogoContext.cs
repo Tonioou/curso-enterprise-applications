@@ -1,6 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using FluentValidation.Results;
+using Microsoft.EntityFrameworkCore;
 using NSE.Catalogo.API.Models;
 using NSE.Core.Data;
+using NSE.Core.Messages;
 using System.Linq;
 using System.Runtime.InteropServices.ComTypes;
 using System.Threading.Tasks;
@@ -22,10 +24,12 @@ namespace NSE.Catalogo.API.Data
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
+            builder.Ignore<ValidationResult>();
+            builder.Ignore<Event>();
             foreach (var property in builder.Model.GetEntityTypes()
                                         .SelectMany(e => e.GetProperties()
                                         .Where(p => p.ClrType == typeof(string))))
-                property.SetColumnType("varchar(100");
+                property.SetColumnType("varchar(100)");
             builder.ApplyConfigurationsFromAssembly(typeof(CatalogoContext).Assembly);
         }
     }

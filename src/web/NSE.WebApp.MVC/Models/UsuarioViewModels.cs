@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using NSE.WebApp.MVC.Extensions;
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
 namespace NSE.WebApp.MVC.Models
@@ -9,6 +11,13 @@ namespace NSE.WebApp.MVC.Models
         [Required(ErrorMessage = "O  campo {0} é obrigatório")]
         [EmailAddress(ErrorMessage = "O campo {0} está em formato inválido")]
         public string Email { get; set; }
+        [Required(ErrorMessage = "O  campo {0} é obrigatório")]
+        [DisplayName("Nome Completo")]
+        public string Nome { get; set; }
+        [Required(ErrorMessage = "O  campo {0} é obrigatório")]
+        [Cpf]
+        [DisplayName("CPF")]
+        public string Cpf { get; set; }
         [Required(ErrorMessage = "O  campo {0} é obrigatório")]
         [StringLength(100, ErrorMessage = "O campo {0} precisa ter entre {2} e {1} caracteres", MinimumLength = 0)]
         public string Senha { get; set; }
