@@ -13,6 +13,8 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using JwtRegisteredClaimNames = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames;
+using NSE.Core.Messages.Integration;
+using EasyNetQ;
 
 namespace NSE.Identidade.API.Controllers
 {
@@ -22,9 +24,11 @@ namespace NSE.Identidade.API.Controllers
         private readonly SignInManager<IdentityUser> _signInManager;
         private readonly UserManager<IdentityUser> _userManager;
         private readonly AppSettings _appSettings;
+        private IBus _bus;
         public AuthController(SignInManager<IdentityUser> signInManager,
                         UserManager<IdentityUser> userManager,
-                        IOptions<AppSettings> appSettings)
+                        IOptions<AppSettings> appSettings
+                        )
         {
             _appSettings = appSettings.Value;
             _signInManager = signInManager;
@@ -74,7 +78,19 @@ namespace NSE.Identidade.API.Controllers
             AdicionarErroProcessamento("Usuário ou Senha incorretos");
             return CustomResponse();
         }
+        private async Task<ResponseMessage> RegistrarCliente(UsuarioRegistro usuarioRegistro)
+        {
+            var usuario = await _userManager.FindByEmailAsync(usuarioRegistro.Email);
+            var usuarioRegistrado = new UsuarioRegistradoIntegrationEvent(
+                    Guid.Parse(usuario.Id),
+                    usuarioRegistro.Nome,
+                    usuarioRegistro.Email,
+                    usuarioRegistro.Cpf);
+            _bus = RabbitHutch.CreateBus("host=localhost:5672");
 
+            var sucesso = await _bus.RequestAsync<UsuarioRegistradoIntegrationEvent, ResponseMessage>(usuarioRegistrado);
+            return sucesso;
+        }
         private async Task<UsuarioRespostaLogin> GerarJwt(string email)
         {
             var user = await _userManager.FindByEmailAsync(email);

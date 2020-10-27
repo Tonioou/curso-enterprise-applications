@@ -13,6 +13,11 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <None Remove="Controllers\tzfpmdsf.bvb~" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="EasyNetQ" Version="5.6.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="3.1.7" />
 		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="3.1.7" />
 		<PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="3.1.7" />
@@ -33,6 +38,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <ProjectReference Include="..\..\building blocks\NSE.MessageBus\NSE.MessageBus\NSE.MessageBus.csproj" />
 	  <ProjectReference Include="..\..\building blocks\NSE.Services\NSE.WebAPI.Core\NSE.WebAPI.Core.csproj" />
 	  <ProjectReference Include="..\..\web\NSE.WebApp.MVC\NSE.WebApp.MVC.csproj" />
 	</ItemGroup>
