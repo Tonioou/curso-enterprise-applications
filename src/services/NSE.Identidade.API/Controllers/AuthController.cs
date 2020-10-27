@@ -14,7 +14,7 @@ using System.Text;
 using System.Threading.Tasks;
 using JwtRegisteredClaimNames = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames;
 using NSE.Core.Messages.Integration;
-using EasyNetQ;
+using NSE.MessageBus;
 
 namespace NSE.Identidade.API.Controllers
 {
@@ -24,12 +24,14 @@ namespace NSE.Identidade.API.Controllers
         private readonly SignInManager<IdentityUser> _signInManager;
         private readonly UserManager<IdentityUser> _userManager;
         private readonly AppSettings _appSettings;
-        private IBus _bus;
+        private readonly IMessageBus _bus;
         public AuthController(SignInManager<IdentityUser> signInManager,
                         UserManager<IdentityUser> userManager,
-                        IOptions<AppSettings> appSettings
+                        IOptions<AppSettings> appSettings,
+                        IMessageBus bus
                         )
         {
+            _bus = bus;
             _appSettings = appSettings.Value;
             _signInManager = signInManager;
             _userManager = userManager;
@@ -49,6 +51,13 @@ namespace NSE.Identidade.API.Controllers
             var result = await _userManager.CreateAsync(user, usuarioRegistro.Senha);
             if (result.Succeeded)
             {
+                var clienteResult = await RegistrarCliente(usuarioRegistro);
+
+                if (!clienteResult.ValidationResult.IsValid)
+                {
+                    await _userManager.DeleteAsync(user);
+                    return CustomResponse(clienteResult.ValidationResult);
+                }
                 return CustomResponse(await GerarJwt(usuarioRegistro.Email));
             }
 
@@ -86,10 +95,16 @@ namespace NSE.Identidade.API.Controllers
                     usuarioRegistro.Nome,
                     usuarioRegistro.Email,
                     usuarioRegistro.Cpf);
-            _bus = RabbitHutch.CreateBus("host=localhost:5672");
 
-            var sucesso = await _bus.RequestAsync<UsuarioRegistradoIntegrationEvent, ResponseMessage>(usuarioRegistrado);
-            return sucesso;
+            try
+            {
+                return await _bus.RequestAsync<UsuarioRegistradoIntegrationEvent, ResponseMessage>(usuarioRegistrado);
+            }
+            catch 
+            {
+                await _userManager.DeleteAsync(usuario);
+                throw;
+            }
         }
         private async Task<UsuarioRespostaLogin> GerarJwt(string email)
         {
